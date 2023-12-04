@@ -17,15 +17,13 @@ module IRR (
   output reg[7:0] IRR);
   
   always @* begin
-  IRR[0]<=i0;
-  IRR[1]<=i1;
-  IRR[2]<=i2;
-  IRR[3]<=i3;
-  IRR[4]<=i4;
-  IRR[5]<=i5;
-  IRR[6]<=i6;
-  IRR[7]<=i7;
-  
-  IRR <= IRR & (~mask);
+  IRR[0] <= i0 & ~mask[0];
+  IRR[1] <= i1 & ~mask[1];
+  IRR[2] <= i2 & ~mask[2];
+  IRR[3] <= i3 & ~mask[3];
+  IRR[4] <= i4 & ~mask[4];
+  IRR[5] <= i5 & ~mask[5];
+  IRR[6] <= i6 & ~mask[6];
+  IRR[7] <= i7 & ~mask[7];
   end
 endmodule
