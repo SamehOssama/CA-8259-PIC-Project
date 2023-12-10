@@ -75,3 +75,32 @@ module initialize_ICW3(
   end
 
 endmodule
+
+module initialize_ICW4(
+  input wire IC4,
+  input wire [7:0] D,
+  input wire UPM,    // 1 8086
+  input wire AEOI,   // auto EOI 1 - Normal EOI = 0
+  input wire M_S,    // master or slave
+  input wire BUF,    // Non-buffered or buffered mode
+  input wire SFNM,   // Special fully nested 1 - not special 0
+  input wire A0,
+  output reg [8:0] icw4   // Output reg for ICW4
+);
+
+  // Internal signal for A0 value
+  reg internal_A0;
+
+  // ICW4 generation logic
+  always @* begin
+    // IC4 = 1, we Use ICW4
+    if (IC4 == 1'b1) begin
+      internal_A0 = 1'b1;
+      icw4 = {internal_A0, D[7:0]};
+    end else begin
+      internal_A0 = 1'bx;
+      icw4 = 9'bx;
+    end
+  end
+
+endmodule
