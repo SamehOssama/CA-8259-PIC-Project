@@ -36,5 +36,6 @@ module IRR (
 
   if INTA begin
     IRR[highest_priority_bit] = 0;
+    end
   end
 endmodule
