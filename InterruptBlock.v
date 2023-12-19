@@ -85,7 +85,7 @@ reg prev_i0,prev_i1,prev_i2,prev_i3,prev_i4,prev_i5,prev_i6,prev_i7;
  end
 endmodule
 
-module Priority_Resolver (input reg [7:0] IRR, input Automatic_Rotate );
+module Priority_Resolver (input reg [7:0] IRR, input Automatic_Rotate, output chosen_interrupt );
   
   
   
