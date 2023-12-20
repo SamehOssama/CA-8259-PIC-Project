@@ -86,8 +86,9 @@ reg prev_i0,prev_i1,prev_i2,prev_i3,prev_i4,prev_i5,prev_i6,prev_i7;
 endmodule
 
 module Priority_Resolver (input [7:0] IRR, input Automatic_Rotate, output reg [7:0] chosen_interrupt );
-	 reg [7:0] priority_status [0:7];  // Array for priority status
-	
+	reg [3:0] priority_status [0:7];  // Array for priority status
+	reg chosen [3:0];
+	reg iterator [3:0];
 	  // Initial block to initialize priority status
 	  initial begin
 	    priority_status[0] = 0;
@@ -102,35 +103,173 @@ module Priority_Resolver (input [7:0] IRR, input Automatic_Rotate, output reg [7
 	initial begin
 		if(IRR[0] == 1'b1) begin
 			  chosen_interrupt = 8'b0000_0001;
+			chosen = 0;
 		  end else if(IRR[1] == 1'b1) begin
 			  chosen_interrupt = 8'b0000_0010;
+			  chosen = 1;
 		  end else if(IRR[2] == 1'b1) begin
 			  chosen_interrupt = 8'b0000_0100;
+			  chosen = 2;
 		  end else if(IRR[3] == 1'b1) begin
 			  chosen_interrupt = 8'b0000_1000;
+			  chosen = 3;
 		  end else if(IRR[4] == 1'b1) begin
 			  chosen_interrupt = 8'b0001_0000;
+			  chosen = 4;
 		  end else if(IRR[5] == 1'b1) begin
 			  chosen_interrupt = 8'b0010_0000;
+			  chosen = 5;
 		  end else if(IRR[6] == 1'b1) begin
 			  chosen_interrupt = 8'b0100_0000;
+			  chosen = 6;
 		  end else if(IRR[7] == 1'b1) begin
 			  chosen_interrupt = 8'b1000_0000;
+			  chosen = 7;
 		  end else begin
 		  //default no interrupt
 		          chosen_interrupt = 8'b0000_0000;
 		  end
+		priority_status [chosen] = 7;
+		chosen = (chosen) > 0 ? (chosen-1):7;
+		priority_status[chosen] = 6;
+		chosen = (chosen) > 0 ? (chosen-1):7;
+		priority_status[chosen] = 5;
+		chosen = (chosen) > 0 ? (chosen-1):7;
+		priority_status[chosen] = 4;
+		chosen = (chosen) > 0 ? (chosen-1):7;
+		priority_status[chosen] = 3;
+		chosen = (chosen) > 0 ? (chosen-1):7;
+		priority_status[chosen] = 2;
+		chosen = (chosen) > 0 ? (chosen-1):7;
+		priority_status[chosen] = 1;
+		chosen = (chosen) > 0 ? (chosen-1):7;
+		priority_status[chosen] = 0;
 	end
 		
 
 	  
   always @* begin
 	  if(Automatic_Rotate) begin
+		  //zero
+		  iterator = (priority_status[0] == 0) ? 0 :
+                 (priority_status[1] == 0) ? 1 :
+                 (priority_status[2] == 0) ? 2 :
+                 (priority_status[3] == 0) ? 3 :
+                 (priority_status[4] == 0) ? 4 :
+                 (priority_status[5] == 0) ? 5 :
+		 (priority_status[6] == 0) ? 6 : 7;
 		  
-	
-
-
+		  if(IRR[iterator]==1)begin
+			chosen_interrupt = 8'b0000_0001;
+		  end else begin
+			  // one
+			  iterator = (priority_status[0] == 1) ? 0 :
+			  (priority_status[1] == 1) ? 1 :
+			  (priority_status[2] == 1) ? 2 :
+			  (priority_status[3] == 1) ? 3 :
+			  (priority_status[4] == 1) ? 4 :
+			  (priority_status[5] == 1) ? 5 :
+			  (priority_status[6] == 1) ? 6 : 7;
+			  if(IRR [iterator] ==1)begin
+				  chosen_interrupt = 8'b0000_0010;
+			  end
+				else begin
+			  //two
+			  iterator = (priority_status[0] == 2) ? 0 :
+			  (priority_status[1] == 2) ? 1 :
+			  (priority_status[2] == 2) ? 2 :
+			  (priority_status[3] == 2) ? 3 :
+			  (priority_status[4] == 2) ? 4 :
+			  (priority_status[5] == 2) ? 5 :
+			  (priority_status[6] == 2) ? 6 : 7;
+			  if(IRR [iterator] ==1)begin
+				  chosen_interrupt = 8'b0000_0100;
+			  end
+				else begin
+			  //three
+			  iterator = (priority_status[0] == 3) ? 0 :
+			  (priority_status[1] == 3) ? 1 :
+			  (priority_status[2] == 3) ? 2 :
+			  (priority_status[3] == 3) ? 3 :
+			  (priority_status[4] == 3) ? 4 :
+			  (priority_status[5] == 3) ? 5 :
+			  (priority_status[6] == 3) ? 6 : 7;
+			  if(IRR [iterator] ==1)begin
+				  chosen_interrupt = 8'b0000_1000;
+			  end
+					else begin
+			  //four
+			  iterator = (priority_status[0] == 4) ? 0 :
+			  (priority_status[1] == 4) ? 1 :
+			  (priority_status[2] == 4) ? 2 :
+			  (priority_status[3] == 4) ? 3 :
+			  (priority_status[4] == 4) ? 4 :
+			  (priority_status[5] == 4) ? 5 :
+			  (priority_status[6] == 4) ? 6 : 7;
+			  if(IRR [iterator] ==1)begin
+				  chosen_interrupt = 8'b0001_0000;
+			  end
+						else begin
+			  //five
+			  iterator = (priority_status[0] == 5) ? 0 :
+			  (priority_status[1] == 5) ? 1 :
+			  (priority_status[2] == 5) ? 2 :
+			  (priority_status[3] == 5) ? 3 :
+			  (priority_status[4] == 5) ? 4 :
+			  (priority_status[5] == 5) ? 5 :
+			  (priority_status[6] == 5) ? 6 : 7;
+			  if(IRR [iterator] ==1)begin
+				  chosen_interrupt = 8'b0010_0000;
+			  end
+							else begin
+			  //six
+			  iterator = (priority_status[0] == 6) ? 0 :
+			  (priority_status[1] == 6) ? 1 :
+			  (priority_status[2] == 6) ? 2 :
+			  (priority_status[3] == 6) ? 3 :
+			  (priority_status[4] == 6) ? 4 :
+			  (priority_status[5] == 6) ? 5 :
+			  (priority_status[6] == 6) ? 6 : 7;
+			  if(IRR [iterator] ==1)begin
+				  chosen_interrupt = 8'b0100_0000;
+			  end
+								else begin
+			  //seven
+			  iterator = (priority_status[0] == 7) ? 0 :
+			  (priority_status[1] == 7) ? 1 :
+			  (priority_status[2] == 7) ? 2 :
+			  (priority_status[3] == 7) ? 3 :
+			  (priority_status[4] == 7) ? 4 :
+			  (priority_status[5] == 7) ? 5 :
+			  (priority_status[6] == 7) ? 6 : 7;
+			  if(IRR [iterator] ==1)begin
+				  chosen_interrupt = 8'b1000_0000;
+			  end
+								end
+							end
+						end
+					end
+				end
+			end
+		  end
 		  
+
+		  //rotation
+		priority_status[chosen] = 7;
+		chosen = (chosen) > 0 ? (chosen-1):7;
+		priority_status[chosen] = 6;
+		chosen = (chosen) > 0 ? (chosen-1):7;
+		priority_status[chosen] = 5;
+		chosen = (chosen) > 0 ? (chosen-1):7;
+		priority_status[chosen] = 4;
+		chosen = (chosen) > 0 ? (chosen-1):7;
+		priority_status[chosen] = 3;
+		chosen = (chosen) > 0 ? (chosen-1):7;
+		priority_status[chosen] = 2;
+		chosen = (chosen) > 0 ? (chosen-1):7;
+		priority_status[chosen] = 1;
+		chosen = (chosen) > 0 ? (chosen-1):7;
+		priority_status[chosen] = 0;
 	  end else begin
 		  //fully nested mode
 		  if(IRR[0] == 1'b1) begin
@@ -153,7 +292,8 @@ module Priority_Resolver (input [7:0] IRR, input Automatic_Rotate, output reg [7
 			  //default no interrupt
 		          chosen_interrupt = 8'b0000_0000;
 		  end
-
 	  end
-  end
+	 
 endmodule
+
+
