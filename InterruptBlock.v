@@ -109,64 +109,18 @@ module Priority_Resolver (input [7:0] IRR, input Automatic_Rotate, output reg [7
 	    priority_status[6] = 6;
 	    priority_status[7] = 7;
 	  end
-	initial begin
-		if(IRR[0] == 1'b1) begin
-			  chosen_interrupt = 8'b0000_0001;
-			  chosen = 3'b000;
-		  end else if(IRR[1] == 1'b1) begin
-			  chosen_interrupt = 8'b0000_0010;
-			  chosen = 3'b001;
-		  end else if(IRR[2] == 1'b1) begin
-			  chosen_interrupt = 8'b0000_0100;
-			  chosen = 2;
-		  end else if(IRR[3] == 1'b1) begin
-			  chosen_interrupt = 8'b0000_1000;
-			  chosen = 3;
-		  end else if(IRR[4] == 1'b1) begin
-			  chosen_interrupt = 8'b0001_0000;
-			  chosen = 4;
-		  end else if(IRR[5] == 1'b1) begin
-			  chosen_interrupt = 8'b0010_0000;
-			  chosen = 5;
-		  end else if(IRR[6] == 1'b1) begin
-			  chosen_interrupt = 8'b0100_0000;
-			  chosen = 6;
-		  end else if(IRR[7] == 1'b1) begin
-			  chosen_interrupt = 8'b1000_0000;
-			  chosen = 7;
-		  end else begin
-		  //default no interrupt
-		          chosen_interrupt = 8'b0000_0000;
-		  end
-		priority_status [chosen] = 7;
-		chosen = (chosen) > 0 ? (chosen-1):7;
-		priority_status[chosen] = 6;
-		chosen = (chosen) > 0 ? (chosen-1):7;
-		priority_status[chosen] = 5;
-		chosen = (chosen) > 0 ? (chosen-1):7;
-		priority_status[chosen] = 4;
-		chosen = (chosen) > 0 ? (chosen-1):7;
-		priority_status[chosen] = 3;
-		chosen = (chosen) > 0 ? (chosen-1):7;
-		priority_status[chosen] = 2;
-		chosen = (chosen) > 0 ? (chosen-1):7;
-		priority_status[chosen] = 1;
-		chosen = (chosen) > 0 ? (chosen-1):7;
-		priority_status[chosen] = 0;
-	end
 		
-	  
   always @* begin
 	  if(Automatic_Rotate) begin
-		  //highest
+		 //highest priority
 		    iterator0 = (priority_status[0] == 0) ? 0 :
                  (priority_status[1] == 0) ? 1 :
                  (priority_status[2] == 0) ? 2 :
                  (priority_status[3] == 0) ? 3 :
                  (priority_status[4] == 0) ? 4 :
                  (priority_status[5] == 0) ? 5 :
-		 (priority_status[6] == 0) ? 6 : 7;
-		//2nd
+		             (priority_status[6] == 0) ? 6 : 7;
+    //2nd
 		  iterator1 =(priority_status[0] == 1) ? 0 :
 			  (priority_status[1] == 1) ? 1 :
 			  (priority_status[2] == 1) ? 2 :
@@ -174,7 +128,7 @@ module Priority_Resolver (input [7:0] IRR, input Automatic_Rotate, output reg [7
 			  (priority_status[4] == 1) ? 4 :
 			  (priority_status[5] == 1) ? 5 :
 			  (priority_status[6] == 1) ? 6 : 7;
-		  //3rd
+		 //3rd
 		  iterator2 = (priority_status[0] == 2) ? 0 :
 			  (priority_status[1] == 2) ? 1 :
 			  (priority_status[2] == 2) ? 2 :
@@ -182,7 +136,7 @@ module Priority_Resolver (input [7:0] IRR, input Automatic_Rotate, output reg [7
 			  (priority_status[4] == 2) ? 4 :
 			  (priority_status[5] == 2) ? 5 :
 			  (priority_status[6] == 2) ? 6 : 7;
-		  //4th
+		 //4th 
 		  iterator3 = (priority_status[0] == 3) ? 0 :
 			  (priority_status[1] == 3) ? 1 :
 			  (priority_status[2] == 3) ? 2 :
@@ -190,7 +144,7 @@ module Priority_Resolver (input [7:0] IRR, input Automatic_Rotate, output reg [7
 			  (priority_status[4] == 3) ? 4 :
 			  (priority_status[5] == 3) ? 5 :
 			  (priority_status[6] == 3) ? 6 : 7;
-		//5th
+      //5th
 		   iterator4 = (priority_status[0] == 4) ? 0 :
 			  (priority_status[1] == 4) ? 1 :
 			  (priority_status[2] == 4) ? 2 :
@@ -198,7 +152,7 @@ module Priority_Resolver (input [7:0] IRR, input Automatic_Rotate, output reg [7
 			  (priority_status[4] == 4) ? 4 :
 			  (priority_status[5] == 4) ? 5 :
 			  (priority_status[6] == 4) ? 6 : 7;
-		//6th
+    //6th
 		  iterator5 = (priority_status[0] == 5) ? 0 :
 			  (priority_status[1] == 5) ? 1 :
 			  (priority_status[2] == 5) ? 2 :
@@ -206,7 +160,7 @@ module Priority_Resolver (input [7:0] IRR, input Automatic_Rotate, output reg [7
 			  (priority_status[4] == 5) ? 4 :
 			  (priority_status[5] == 5) ? 5 :
 			  (priority_status[6] == 5) ? 6 : 7;
-		//7th
+    //7th
 		  iterator6 = (priority_status[0] == 6) ? 0 :
 			  (priority_status[1] == 6) ? 1 :
 			  (priority_status[2] == 6) ? 2 :
@@ -214,8 +168,8 @@ module Priority_Resolver (input [7:0] IRR, input Automatic_Rotate, output reg [7
 			  (priority_status[4] == 6) ? 4 :
 			  (priority_status[5] == 6) ? 5 :
 			  (priority_status[6] == 6) ? 6 : 7;
-		  //least
-		  iterator7 = (priority_status[0] == 7) ? 0 :
+		  //least priority
+		    iterator7 = (priority_status[0] == 7) ? 0 :
 			  (priority_status[1] == 7) ? 1 :
 			  (priority_status[2] == 7) ? 2 :
 			  (priority_status[3] == 7) ? 3 :
