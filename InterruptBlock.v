@@ -1,7 +1,7 @@
 module IRR (
   //Inputs from Control Logic
-  input level_or_edge_flag , 
-  input [7:0] mask,
+  input level_or_edge_flag ,  //from control
+  input [7:0] mask, //from control
   
   input i0,
   input i1,
@@ -12,7 +12,8 @@ module IRR (
   input i6,
   input i7,
 
-  output reg[7:0] IRR
+  output reg[7:0] IRR, //to priority resolver
+  output INT //to control
   );
   
 reg prev_i0,prev_i1,prev_i2,prev_i3,prev_i4,prev_i5,prev_i6,prev_i7;  
@@ -83,9 +84,13 @@ reg prev_i0,prev_i1,prev_i2,prev_i3,prev_i4,prev_i5,prev_i6,prev_i7;
       
    end
  end
+ //sending to control that there is an interrupt
+ 
+ assign INT =(IRR[0] | IRR[1] | IRR[2] | IRR[3] | IRR[4] | IRR[5] | IRR[6] | IRR[7]);
+ 
 endmodule
 
-module Priority_Resolver (input [7:0] IRR, input Automatic_Rotate, output reg [7:0] chosen_interrupt );
+module Priority_Resolver (input [7:0] IRR /*from IRR*/, input Automatic_Rotate/*from control */, output reg [7:0] chosen_interrupt /*to ISR*/ );
   
 	reg [2:0] priority_status [0:7];  // Array for priority status
 	reg [2:0] chosen ;
@@ -256,3 +261,12 @@ module Priority_Resolver (input [7:0] IRR, input Automatic_Rotate, output reg [7
 	  end
 	 end
 endmodule
+
+module ISR ( input [7:0] chosen_interrupt, input EOI /*from control*/, output reg [7:0] ISR);
+
+always @* begin
+  ISR = chosen_interrupt;
+end  
+endmodule
+
+
