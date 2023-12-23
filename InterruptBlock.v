@@ -1,7 +1,8 @@
 module IRR (
-  //Inputs from Control Logic
   input level_or_edge_flag ,  //from control
   input [7:0] mask, //from control
+  input [7:0] clearHighest, //from ISR
+  input clear, //from control
   
   input i0,
   input i1,
@@ -83,6 +84,10 @@ reg prev_i0,prev_i1,prev_i2,prev_i3,prev_i4,prev_i5,prev_i6,prev_i7;
       prev_i7 <= i7;
       
    end
+   
+   if(clear) begin
+        IRR = IRR & ~clearHighest;
+      end
  end
  //sending to control that there is an interrupt
  
@@ -90,7 +95,8 @@ reg prev_i0,prev_i1,prev_i2,prev_i3,prev_i4,prev_i5,prev_i6,prev_i7;
  
 endmodule
 
-module Priority_Resolver (input [7:0] IRR /*from IRR*/, input Automatic_Rotate/*from control */, output reg [7:0] chosen_interrupt /*to ISR*/ );
+module Priority_Resolver (input [7:0] IRR /*from IRR*/,input clear,input set,input reset/*from control */,
+ output reg [7:0] chosen_interrupt /*to ISR*/ );
   
 	reg [2:0] priority_status [0:7];  // Array for priority status
 	reg [2:0] chosen ;
@@ -102,10 +108,16 @@ module Priority_Resolver (input [7:0] IRR /*from IRR*/, input Automatic_Rotate/*
 	reg [2:0] iterator5 ;
 	reg [2:0] iterator6 ;
 	reg [2:0] iterator7 ;
-	 
-	  // Initial block to initialize priority status
-	  initial begin
-	    priority_status[0] = 0;
+	
+	reg prevset =0;
+	reg prevreset =1;
+	  
+		
+  always @* begin
+    // Initialize priority status
+    if((prevset == 0 && set == 1) || (prevreset == 1 && reset == 0))begin
+      
+      priority_status[0] = 0;
 	    priority_status[1] = 1;
 	    priority_status[2] = 2;
 	    priority_status[3] = 3;
@@ -113,10 +125,13 @@ module Priority_Resolver (input [7:0] IRR /*from IRR*/, input Automatic_Rotate/*
 	    priority_status[5] = 5;
 	    priority_status[6] = 6;
 	    priority_status[7] = 7;
-	  end
-		
-  always @* begin
-	  if(Automatic_Rotate) begin
+	    
+	    prevset = set;
+	    prevreset = reset;
+	    
+    end
+	  if(set || !reset ) begin
+	    ////////Automatic Rotation mode
 		 //highest priority
 		    iterator0 = (priority_status[0] == 0) ? 0 :
                  (priority_status[1] == 0) ? 1 :
@@ -259,14 +274,55 @@ module Priority_Resolver (input [7:0] IRR /*from IRR*/, input Automatic_Rotate/*
 		    chosen_interrupt = 8'b0000_0000;
 		  end
 	  end
+	  if(clear)begin
+	    chosen_interrupt = 8'b0000_0000;
+	    end
 	 end
 endmodule
 
-module ISR ( input [7:0] chosen_interrupt, input EOI /*from control*/, output reg [7:0] ISR);
+module ISR ( input [7:0] chosen_interrupt/*from priority resolver*/,input clear /*from control*/,output clearHighest ,output reg [7:0] ISR);
 
 always @* begin
   ISR = chosen_interrupt;
+  if(clear) begin
+    ISR = 8'b0000_0000;
+  end
 end  
+assign  clearHighest = chosen_interrupt;
 endmodule
 
+module InterruptBlock (
+  //from control
+  input level_or_edge_flag ,  
+  input [7:0] mask,
+  
+  input clear,
+  
+  input set,
+  input reset,
+  
+  //from peripherals
+  input i0,
+  input i1,
+  input i2,
+  input i3,
+  input i4,
+  input i5,
+  input i6,
+  input i7,
 
+  //Outputs
+output INTtocontrol,
+output reg [7:0] ISRtocontrol
+  );
+  
+  IRR(.level_or_edge_flag(level_or_edge_flag),.mask(mask),.clearHighest(OutclearHighest),.clear(clear),.i0(i0),.i1(i1),.i2(i2),.i3(i3),.i4(i5),
+  .i6(i6),.i7(i7),.IRR(OutputIRR),.INT(INTtocontrol));
+  
+  Priority_Resolver (.IRR(OutputIRR),.clear(clear),.set(set),.reset(reset),
+ .chosen_interrupt(Outputchosen_interrupt));
+ 
+ ISR (.chosen_interrupt(Outputchosen_interrupt), .clear(clear),.clearHighest(OutclearHighest) ,.ISR(ISRtocontrol));  
+  
+  
+endmodule
