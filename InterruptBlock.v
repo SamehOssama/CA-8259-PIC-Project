@@ -86,7 +86,7 @@ reg prev_i0,prev_i1,prev_i2,prev_i3,prev_i4,prev_i5,prev_i6,prev_i7;
  end
  //sending to control that there is an interrupt
  
- assign INT =(IRR[0] | IRR[1] | IRR[2] | IRR[3] | IRR[4] | IRR[5] | IRR[6] | IRR[7]);
+ assign INT =|IRR;
  
 endmodule
 
@@ -256,7 +256,7 @@ module Priority_Resolver (input [7:0] IRR /*from IRR*/, input Automatic_Rotate/*
 			  chosen_interrupt = 8'b1000_0000;
 		  end else begin 
 			  //default no interrupt
-		          chosen_interrupt = 8'b0000_0000;
+		    chosen_interrupt = 8'b0000_0000;
 		  end
 	  end
 	 end
