@@ -1,8 +1,9 @@
 module IRR (
   input level_or_edge_flag ,  //from control
   input [7:0] mask, //from control
-  input [7:0] clearHighest, //from ISR
   input clear, //from control
+  input intAc, //from control
+  input [7:0] clearHighest, //from ISR
   
   input i0,
   input i1,
@@ -13,6 +14,7 @@ module IRR (
   input i6,
   input i7,
 
+  output specialDeliveryFlag, //to ISR
   output reg[7:0] IRR, //to priority resolver
   output INT //to control
   );
@@ -83,20 +85,25 @@ reg prev_i0,prev_i1,prev_i2,prev_i3,prev_i4,prev_i5,prev_i6,prev_i7;
       prev_i6 <= i6;
       prev_i7 <= i7;
       
-   end
-   
+   end 
+  end
+  
+     always @* begin
    if(clear) begin
         IRR = IRR & ~clearHighest;
       end
  end
- //sending to control that there is an interrupt
  
+
+ 
+ assign specialDeliveryFlag = (intAc == 1) && (|IRR == 0);
+ //sending to control that there is an interrupt
  assign INT =|IRR;
  
 endmodule
 
 module Priority_Resolver (input [7:0] IRR /*from IRR*/,input clear,input set,input reset/*from control */,
- output reg [7:0] chosen_interrupt /*to ISR*/ );
+ output reg [2:0] chosen_interrupt /*to ISR*/ );
   
 	reg [2:0] priority_status [0:7];  // Array for priority status
 	reg [2:0] chosen ;
@@ -198,36 +205,28 @@ module Priority_Resolver (input [7:0] IRR /*from IRR*/,input clear,input set,inp
 			  (priority_status[6] == 7) ? 6 : 7;
 			  
 		   if(IRR[iterator0] == 1'b1) begin
-			  chosen_interrupt = 8'b0000_0000;
-			  chosen_interrupt [iterator0] =1; 
+			  chosen_interrupt  = 0; 
 			  chosen = iterator0;
 		  end else if(IRR[iterator1]== 1'b1) begin
-			  chosen_interrupt = 8'b0000_0000;
-			  chosen_interrupt [iterator1] =1; 
+			  chosen_interrupt = 1; 
 			  chosen = iterator1;
 		  end else if(IRR[iterator2] == 1'b1) begin
-			  chosen_interrupt = 8'b0000_0000;
-			  chosen_interrupt [iterator2] =1; 
+			  chosen_interrupt  = 2; 
 			  chosen = iterator2;
 		  end else if(IRR[iterator3]== 1'b1) begin
-			  chosen_interrupt = 8'b0000_0000;
-			  chosen_interrupt [iterator3] =1; 
+			  chosen_interrupt = 3; 
 			  chosen = iterator3;
 		  end else if(IRR[iterator4] == 1'b1) begin
-			  chosen_interrupt = 8'b0000_0000;
-			  chosen_interrupt [iterator4] =1; 
+			  chosen_interrupt = 4; 
 			  chosen = iterator4;
 		  end else if(IRR[iterator5] == 1'b1) begin
-			  chosen_interrupt = 8'b0000_0000;
-			  chosen_interrupt [iterator5] =1; 
+			  chosen_interrupt = 5; 
 			  chosen = iterator5;
 		  end else if(IRR[iterator6] == 1'b1) begin
-			  chosen_interrupt = 8'b0000_0000;
-			  chosen_interrupt [iterator6] =1; 
+			  chosen_interrupt = 6; 
 			  chosen = iterator6;
 		  end else if(IRR[iterator7] == 1'b1) begin
-			  chosen_interrupt = 8'b0000_0000;
-			  chosen_interrupt [iterator7] =1;
+			  chosen_interrupt = 7;
 			  chosen = iterator7; 
 		  end
 		
@@ -254,38 +253,41 @@ module Priority_Resolver (input [7:0] IRR /*from IRR*/,input clear,input set,inp
 	  end else begin
 		  //fully nested mode
 		  if(IRR[0] == 1'b1) begin
-			  chosen_interrupt = 8'b0000_0001;
+			  chosen_interrupt = 0;
 		  end else if(IRR[1] == 1'b1) begin
-			  chosen_interrupt = 8'b0000_0010;
+			  chosen_interrupt = 1;
 		  end else if(IRR[2] == 1'b1) begin
-			  chosen_interrupt = 8'b0000_0100;
+			  chosen_interrupt = 2;
 		  end else if(IRR[3] == 1'b1) begin
-			  chosen_interrupt = 8'b0000_1000;
+			  chosen_interrupt = 3;
 		  end else if(IRR[4] == 1'b1) begin
-			  chosen_interrupt = 8'b0001_0000;
+			  chosen_interrupt = 4;
 		  end else if(IRR[5] == 1'b1) begin
-			  chosen_interrupt = 8'b0010_0000;
+			  chosen_interrupt = 5;
 		  end else if(IRR[6] == 1'b1) begin
-			  chosen_interrupt = 8'b0100_0000;
+			  chosen_interrupt = 6;
 		  end else if(IRR[7] == 1'b1) begin
-			  chosen_interrupt = 8'b1000_0000;
+			  chosen_interrupt = 7;
 		  end else begin 
 			  //default no interrupt
-		    chosen_interrupt = 8'b0000_0000;
 		  end
 	  end
 	  if(clear)begin
-	    chosen_interrupt = 8'b0000_0000;
+	    chosen_interrupt = 0;
 	    end
 	 end
 endmodule
 
-module ISR ( input [7:0] chosen_interrupt/*from priority resolver*/,input clear /*from control*/,output clearHighest ,output reg [7:0] ISR);
-
+module ISR ( input flag/*from IRR */,input [2:0] chosen_interrupt/*from priority resolver*/,input clear /*from control*/,output clearHighest ,output reg [7:0] ISR);
+reg [2:0] specialDelivery = 7;
 always @* begin
+  if(flag)begin
+    ISR = specialDelivery;
+  end else begin
   ISR = chosen_interrupt;
+end
   if(clear) begin
-    ISR = 8'b0000_0000;
+    ISR = 0;
   end
 end  
 assign  clearHighest = chosen_interrupt;
@@ -313,16 +315,15 @@ module InterruptBlock (
 
   //Outputs
 output INTtocontrol,
-output reg [7:0] ISRtocontrol
+output reg [2:0] ISRtocontrol
   );
   
   IRR(.level_or_edge_flag(level_or_edge_flag),.mask(mask),.clearHighest(OutclearHighest),.clear(clear),.i0(i0),.i1(i1),.i2(i2),.i3(i3),.i4(i5),
-  .i6(i6),.i7(i7),.IRR(OutputIRR),.INT(INTtocontrol));
+  .i6(i6),.i7(i7),.specialDeliveryFlag(OutspecialDeliveryFlag),.IRR(OutputIRR),.INT(INTtocontrol));
   
   Priority_Resolver (.IRR(OutputIRR),.clear(clear),.set(set),.reset(reset),
  .chosen_interrupt(Outputchosen_interrupt));
  
- ISR (.chosen_interrupt(Outputchosen_interrupt), .clear(clear),.clearHighest(OutclearHighest) ,.ISR(ISRtocontrol));  
-  
+ ISR (.flag(OutspecialDeliveryFlag),.chosen_interrupt(Outputchosen_interrupt), .clear(clear),.clearHighest(OutclearHighest) ,.ISR(ISRtocontrol));  
   
 endmodule
