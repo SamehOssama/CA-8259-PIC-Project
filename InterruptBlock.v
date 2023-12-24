@@ -1,8 +1,7 @@
 module IRR (
   input level_or_edge_flag ,  //from control
   input [7:0] mask, //from control
-  input clear, //from control
-  input intAc, //from control
+  input [1:0]intAcounter, //from control
   input [7:0] clearHighest, //from ISR
   
   input i0,
@@ -89,20 +88,20 @@ reg prev_i0,prev_i1,prev_i2,prev_i3,prev_i4,prev_i5,prev_i6,prev_i7;
   end
   
      always @* begin
-   if(clear) begin
+   if((intAcounter == 2'b01) && !(|IRR == 0)) begin
         IRR = IRR & ~clearHighest;
       end
  end
  
 
  
- assign specialDeliveryFlag = (intAc == 1) && (|IRR == 0);
+ assign specialDeliveryFlag = (intAcounter == 2'b01) && (|IRR == 0);
  //sending to control that there is an interrupt
  assign INT =|IRR;
  
 endmodule
 
-module Priority_Resolver (input [7:0] IRR /*from IRR*/,input clear,input set,input reset/*from control */,
+module Priority_Resolver (input [7:0] IRR /*from IRR*/,input clear /*from ISR*/,input set,input reset/*from control */,
  output reg [2:0] chosen_interrupt /*to ISR*/ );
   
 	reg [2:0] priority_status [0:7];  // Array for priority status
@@ -278,30 +277,39 @@ module Priority_Resolver (input [7:0] IRR /*from IRR*/,input clear,input set,inp
 	 end
 endmodule
 
-module ISR ( input flag/*from IRR */,input [2:0] chosen_interrupt/*from priority resolver*/,input clear /*from control*/,output clearHighest ,output reg [7:0] ISR);
+module ISR ( input flag/*from IRR */,input [1:0] intAcounter,input aeoi,input eoi,input [2:0] chosen_interrupt/*from priority resolver*/,
+output clearHighest ,output reg [7:0] ISR,output clear /*to Priority resolver*/);
 reg [2:0] specialDelivery = 7;
 always @* begin
   if(flag)begin
     ISR = specialDelivery;
-  end else begin
+  end else if (intAcounter == 2'b01) begin
   ISR = chosen_interrupt;
 end
-  if(clear) begin
+  if(intAcounter == 2'b10 && aeoi) begin
     ISR = 0;
   end
+  if(eoi)begin
+    ISR = 0;
+    end
 end  
 assign  clearHighest = chosen_interrupt;
+assign clear = (ISR == 0);
 endmodule
+
 
 module InterruptBlock (
   //from control
   input level_or_edge_flag ,  
   input [7:0] mask,
   
-  input clear,
   
   input set,
   input reset,
+  
+  input aeoi,
+  input eoi,
+  input [1:0] intAcounter,
   
   //from peripherals
   input i0,
@@ -318,12 +326,16 @@ output INTtocontrol,
 output reg [2:0] ISRtocontrol
   );
   
-  IRR(.level_or_edge_flag(level_or_edge_flag),.mask(mask),.clearHighest(OutclearHighest),.clear(clear),.i0(i0),.i1(i1),.i2(i2),.i3(i3),.i4(i5),
-  .i6(i6),.i7(i7),.specialDeliveryFlag(OutspecialDeliveryFlag),.IRR(OutputIRR),.INT(INTtocontrol));
+  IRR(.level_or_edge_flag(level_or_edge_flag),.intAcounter(intAcounter),.mask(mask),.clearHighest(OutclearHighest),
+  .i0(i0),.i1(i1),.i2(i2),.i3(i3),.i4(i5),.i6(i6),.i7(i7),
+  .specialDeliveryFlag(OutspecialDeliveryFlag),.IRR(OutputIRR),.INT(INTtocontrol));
   
-  Priority_Resolver (.IRR(OutputIRR),.clear(clear),.set(set),.reset(reset),
+  Priority_Resolver (.IRR(OutputIRR),.clear(clearFromISR),.set(set),.reset(reset),
  .chosen_interrupt(Outputchosen_interrupt));
  
- ISR (.flag(OutspecialDeliveryFlag),.chosen_interrupt(Outputchosen_interrupt), .clear(clear),.clearHighest(OutclearHighest) ,.ISR(ISRtocontrol));  
+ ISR (.flag(OutspecialDeliveryFlag),.aeoi(aeoi),.eoi(eoi),.intAcounter(intAcounter),
+ .chosen_interrupt(Outputchosen_interrupt),.clear(clearFromISR),
+ .clearHighest(OutclearHighest) ,.ISR(ISRtocontrol));  
+  
   
 endmodule
