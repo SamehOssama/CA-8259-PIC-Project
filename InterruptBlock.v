@@ -289,7 +289,7 @@ end
   if(intAcounter == 2'b10 && aeoi) begin
     ISR = 0;
   end
-  if(eoi)begin
+  if(eoi && !aeoi)begin
     ISR = 0;
     end
 end  
