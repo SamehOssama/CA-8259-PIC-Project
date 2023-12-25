@@ -293,7 +293,7 @@ end
     ISR = 0;
     end
 end  
-assign  clearHighest = chosen_interrupt;
+assign  clearHighest = (flag) ? specialDelivery : chosen_interrupt;
 assign clear = (ISR == 0);
 endmodule
 
