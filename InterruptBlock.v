@@ -278,23 +278,23 @@ module Priority_Resolver (input [7:0] IRR /*from IRR*/,input clear /*from ISR*/,
 endmodule
 
 module ISR ( input flag/*from IRR */,input [1:0] intAcounter,input aeoi,input eoi,input [2:0] chosen_interrupt/*from priority resolver*/,
-output clearHighest ,output reg [7:0] ISR,output clear /*to Priority resolver*/);
+output [7:0] clearHighest ,output reg [2:0] ISROut,output clear /*to Priority resolver*/);
 reg [2:0] specialDelivery = 7;
 always @* begin
   if(flag)begin
-    ISR = specialDelivery;
+    ISROut = specialDelivery;
   end else if (intAcounter == 2'b01) begin
-  ISR = chosen_interrupt;
+  ISROut = chosen_interrupt;
 end
   if(intAcounter == 2'b10 && aeoi) begin
-    ISR = 0;
+    ISROut = 0;
   end
   if(eoi && !aeoi)begin
-    ISR = 0;
+    ISROut = 0;
     end
 end  
 assign  clearHighest = (flag) ? specialDelivery : chosen_interrupt;
-assign clear = (ISR == 0);
+assign clear = (ISROut == 0);
 endmodule
 
 
@@ -320,22 +320,26 @@ module InterruptBlock (
   input i5,
   input i6,
   input i7,
-
+  
   //Outputs
 output INTtocontrol,
-output reg [2:0] ISRtocontrol
+output [2:0] ISRtocontrol
   );
   
-  IRR(.level_or_edge_flag(level_or_edge_flag),.intAcounter(intAcounter),.mask(mask),.clearHighest(OutclearHighest),
-  .i0(i0),.i1(i1),.i2(i2),.i3(i3),.i4(i5),.i6(i6),.i7(i7),
+  wire [2:0] Outputchosen_interrupt;
+  wire [7:0] OutputIRR;
+  wire [7:0] OutclearHighest;
+  
+  IRR A (.level_or_edge_flag(level_or_edge_flag),.intAcounter(intAcounter),.mask(mask),.clearHighest(OutclearHighest),
+  .i0(i0),.i1(i1),.i2(i2),.i3(i3),.i4(i4),.i5(i5),.i6(i6),.i7(i7),
   .specialDeliveryFlag(OutspecialDeliveryFlag),.IRR(OutputIRR),.INT(INTtocontrol));
   
-  Priority_Resolver (.IRR(OutputIRR),.clear(clearFromISR),.set(set),.reset(reset),
+  Priority_Resolver B (.IRR(OutputIRR),.clear(clearFromISR),.set(set),.reset(reset),
  .chosen_interrupt(Outputchosen_interrupt));
  
- ISR (.flag(OutspecialDeliveryFlag),.aeoi(aeoi),.eoi(eoi),.intAcounter(intAcounter),
+ ISR C (.flag(OutspecialDeliveryFlag),.aeoi(aeoi),.eoi(eoi),.intAcounter(intAcounter),
  .chosen_interrupt(Outputchosen_interrupt),.clear(clearFromISR),
- .clearHighest(OutclearHighest) ,.ISR(ISRtocontrol));  
+ .clearHighest(OutclearHighest) ,.ISROut(ISRtocontrol));  
   
-  
+
 endmodule
