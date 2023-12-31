@@ -1,5 +1,6 @@
 module Control_Unit (
-  input RWL_ENABLE,   // from read-write logic
+  input WR_ENABLE,
+  input RD_ENABLE,
   inout [7:0] DATA,   // data bus
   input A0,           
   input INTERNAL_INT,  
@@ -46,7 +47,7 @@ module Control_Unit (
 
 
 // ICW
-always @(posedge RWL_ENABLE) begin
+always @(posedge WR_ENABLE) begin
         if (!INT&& !A0 && DATA[4]) begin
             state <= next_state;
         end else begin
@@ -54,7 +55,7 @@ always @(posedge RWL_ENABLE) begin
         end 
 end
 
-always @(posedge RWL_ENABLE) begin
+always @(posedge WR_ENABLE) begin
     case (state)
         ICW1: ICW1_REG <= DATA;
         ICW2: ICW2_REG <= DATA;
@@ -65,7 +66,7 @@ always @(posedge RWL_ENABLE) begin
 end
 
 
-always @(posedge RWL_ENABLE) begin
+always @(posedge WR_ENABLE) begin
     case (state)
         start: next_state <= start;
         ICW1:  next_state <= ICW2;
@@ -90,7 +91,7 @@ assign ICW4_AEOI = ICW4_REG[1];
 
 
 // OCW
-always @(posedge RWL_ENABLE) begin
+always @(posedge WR_ENABLE) begin
     if(state == ready) begin
         if (A0 == 1) begin
             interrupt_mask <= DATA;
@@ -165,7 +166,7 @@ end
 
 
 // read block
-always @(negedge RWL_ENABLE) begin
+always @(negedge RD_ENABLE) begin
     if(state == ready) begin
         if(A0 == 1) begin
             DATA_REG <= interrupt_mask;
