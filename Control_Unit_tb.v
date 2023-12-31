@@ -85,27 +85,43 @@ module Control_Unit_tb;
         #0 RD_ENABLE_internal = 1'b0;
         #0 A0_internal = 1'b1;
         #0 DATA_internal_REG = 8'bzzzzzzzz;
-        // Test Case 1:
+        // Test ICW1 :
         #0 A0_internal = 1'b0;
         #0 DATA_internal_REG = 8'b00010001;
         #5 WR_ENABLE_internal = 1'b1;
         #5 WR_ENABLE_internal = 1'b0;
-        // Test Case 2: 
+        // Test ICW2 :
         #0 A0_internal = 1'b1;
         #0 DATA_internal_REG = 8'b11111000;
         #5 WR_ENABLE_internal = 1'b1;
         #5 WR_ENABLE_internal = 1'b0;
         #0 A0_internal = 1'b0;
-        // Test Case 3: 
+        // Test ICW3 :
         #0 A0_internal = 1'b1;
         #0 DATA_internal_REG = 8'b00111100;
         #5 WR_ENABLE_internal = 1'b1;
         #5 WR_ENABLE_internal = 1'b0;
-        //Test Case 4: 
+        // Test ICW4 :
         #0 A0_internal = 1'b1;
         #0 DATA_internal_REG = 8'b00100001;
         #5 WR_ENABLE_internal = 1'b1;
         #5 WR_ENABLE_internal = 1'b0;
+        // Test OCW1 :
+        #0 A0_internal = 1'b1;
+        #0 DATA_internal_REG = 8'b01000000;
+        #5 WR_ENABLE_internal = 1'b1;
+        #5 WR_ENABLE_internal = 1'b0;
+        // Test OCW2 :
+        #0 A0_internal = 1'b0;
+        #0 DATA_internal_REG = 8'b00100000;
+        #5 WR_ENABLE_internal = 1'b1;
+        #5 WR_ENABLE_internal = 1'b0;
+        // Test OCW3 :
+        #0 A0_internal = 1'b0;
+        #0 DATA_internal_REG = 8'b00001000;
+        #5 WR_ENABLE_internal = 1'b1;
+        #5 WR_ENABLE_internal = 1'b0;
+
 
     end
 
