@@ -49,7 +49,7 @@ module Control_Unit (
 
 // ICW
 always @(posedge WR_ENABLE) begin
-        if (!INT&& !A0 && DATA[4]) begin
+        if (state == start && !A0 && DATA[4]) begin
             state <= next_state;
         end else begin
            state <= state;
