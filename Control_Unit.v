@@ -6,8 +6,8 @@ module Control_Unit (
   input INTA_,       // ack from processor
   input SP_, // 1 >> master , 0 >> slave
   input [2:0] CAS_IN, // for slave 
-  output [2:0] CAS_OUT, //  for master
   input [2:0]IR_NUM,
+  output [2:0] CAS_OUT, //  for master
   output reg [7:0] interrupt_mask,
   output reg INT,
   output reg AEOI,  
