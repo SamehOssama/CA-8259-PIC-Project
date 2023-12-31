@@ -45,6 +45,7 @@ module Control_Unit (
   parameter [1:0] OCW2 = 2'b01;
   parameter [1:0] OCW3 = 2'b10;
 
+  assign DATA = (RD_ENABLE)? DATA_REG : 8'bzzzzzzzz;
 
 // ICW
 always @(posedge WR_ENABLE) begin
