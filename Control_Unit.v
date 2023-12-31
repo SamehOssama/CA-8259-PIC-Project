@@ -48,7 +48,36 @@ module Control_Unit (
   assign DATA = (RD_ENABLE)? DATA_REG : 8'bzzzzzzzz;
 
 // ICW
-always @(posedge WR_ENABLE) begin
+always @(*) begin
+    case (state)
+        start: begin
+            if (!A0 && DATA[4]) state <= ICW1;
+            else state <= ready;
+        end
+        ICW1: begin
+            state <= ICW2;
+            ICW1_REG <= DATA;
+        end
+        ICW2: begin
+            if (!ICW1_REG[1]) state <= ICW3;
+            else if (ICW1_REG[0]) state <= ICW4;
+            else state <= ready;
+            ICW2_REG <= DATA;
+        end
+        ICW3: begin
+            if (ICW1_REG[0]) state <= ICW4;
+            else state <= ready;
+            ICW3_REG <= DATA;
+        end
+        ICW4: begin
+            state <= ready;
+            ICW4_REG <= DATA;
+        end
+        default: state <= state;
+    endcase
+end
+
+/* always @(*) begin
         if (state == start && !A0 && DATA[4]) begin
             state <= next_state;
         end else begin
@@ -56,7 +85,7 @@ always @(posedge WR_ENABLE) begin
         end 
 end
 
-always @(posedge WR_ENABLE) begin
+always @(state) begin
     case (state)
         ICW1: ICW1_REG <= DATA;
         ICW2: ICW2_REG <= DATA;
@@ -67,15 +96,15 @@ always @(posedge WR_ENABLE) begin
 end
 
 
-always @(posedge WR_ENABLE) begin
+always @(state) begin
     case (state)
-        start: next_state <= start;
+        start: next_state <= ICW1;
         ICW1:  next_state <= ICW2;
         ICW2:  next_state <= (ICW1_REG[1]==0)?   ICW3 : (ICW1_REG[0]==1) ?  ICW4 : ready;
         ICW3:  next_state <= (ICW1_REG[0]==1)?   ICW4 : ready;
         default: next_state <= ready;
     endcase
-end
+end */
 
 // ICW1 data
 assign sngl = ICW1_REG[1];
