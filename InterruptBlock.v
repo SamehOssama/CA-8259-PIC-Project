@@ -2,7 +2,7 @@ module IRR (
   input level_or_edge_flag ,  //from control
   input [7:0] mask, //from control
   input [1:0]intAcounter, //from control
-  input [7:0] clearHighest, //from ISR
+  input [2:0] clearHighest, //from ISR
   
   input i0,
   input i1,
@@ -18,9 +18,9 @@ module IRR (
   output INT //to control
   );
   
-reg prev_i0,prev_i1,prev_i2,prev_i3,prev_i4,prev_i5,prev_i6,prev_i7;  
 
-  always @* begin
+
+  always @(i0 or i1 or i2 or i3 or i4 or i5 or i6 or i7) begin
 	if(level_or_edge_flag) begin
     IRR[0] <= i0 & ~mask[0];
     IRR[1] <= i1 & ~mask[1];
@@ -30,66 +30,68 @@ reg prev_i0,prev_i1,prev_i2,prev_i3,prev_i4,prev_i5,prev_i6,prev_i7;
     IRR[5] <= i5 & ~mask[5];
     IRR[6] <= i6 & ~mask[6];
     IRR[7] <= i7 & ~mask[7];
-  end else begin
- // Edge-sensitive logic for each input
-      if (i0 == 1'b1 && prev_i0 == 1'b0) begin
-         IRR[0] <= 1'b1; 
-      end else begin
-         IRR[0] <= 1'b0;
-      end
-      if (i1 == 1'b1 && prev_i1 == 1'b0) begin
-         IRR[1] <= 1'b1; 
-      end else begin
-         IRR[1] <= 1'b0;
-      end
-      if (i2 == 1'b1 && prev_i2 == 1'b0) begin
-         IRR[2] <= 1'b1; 
-      end else begin
-         IRR[2] <= 1'b0;
-      end
-      if (i3 == 1'b1 && prev_i3 == 1'b0) begin
-         IRR[3] <= 1'b1; 
-      end else begin
-         IRR[3] <= 1'b0;
-      end	
-      if (i4 == 1'b1 && prev_i4 == 1'b0) begin
-         IRR[4] <= 1'b1; 
-      end else begin
-         IRR[4] <= 1'b0;
-      end
-      if (i5 == 1'b1 && prev_i5 == 1'b0) begin
-         IRR[5] <= 1'b1;
-      end else begin
-         IRR[5] <= 1'b0;
-      end
-      if (i6 == 1'b1 && prev_i6 == 1'b0) begin
-         IRR[6] <= 1'b1;
-      end else begin
-         IRR[6] <= 1'b0;
-      end	 
-      if (i7 == 1'b1 && prev_i7 == 1'b0) begin
-         IRR[7] <= 1'b1; 
-      end else begin
-         IRR[7] <= 1'b0;
-      end
-
+ end
+ end
  
-   // Update the previous signals for the next iteration
-      prev_i0 <= i0;
-      prev_i1 <= i1;
-      prev_i2 <= i2;
-      prev_i3 <= i3;
-      prev_i4 <= i4;
-      prev_i5 <= i5;
-      prev_i6 <= i6;
-      prev_i7 <= i7;
-      
-   end 
+ always @(posedge i0) begin
+   if(!level_or_edge_flag) begin
+      IRR[0] <= i0 &~mask[0];
+    end
   end
+    always @(posedge i1) begin
+      if(!level_or_edge_flag) begin
+      IRR[1] <= i1 &~mask[1];
+    end
+  end
+    always @(posedge i2) begin
+      if(!level_or_edge_flag) begin
+      IRR[2] <= i2 &~mask[2];
+    end
+  end
+    always @(posedge i3) begin
+      if(!level_or_edge_flag)begin
+      IRR[3] <= i3 &~mask[3];
+    end
+    end
+    always @(posedge i4) begin
+      if(!level_or_edge_flag)begin
+      IRR[4] <= i4 &~mask[4];
+    end
+    end
+    always @(posedge i5) begin
+      if(!level_or_edge_flag)begin
+      IRR[5] <= i5 &~mask[5];
+    end
+    end
+    always @(posedge i6) begin
+      if(!level_or_edge_flag)begin
+      IRR[6] <= i6 &~mask[6];
+    end
+    end
+    always @(posedge i7) begin
+      if(!level_or_edge_flag)begin
+      IRR[7] <= i7 &~mask[7];
+    end
+    end
   
-     always @* begin
+     always @(intAcounter) begin
    if((intAcounter == 2'b01) && !(|IRR == 0)) begin
-        IRR = IRR & ~clearHighest;
+      if(clearHighest==0)
+          IRR[0]=0;
+          else if(clearHighest==1)
+          IRR[1]=0;
+          else if(clearHighest==2)
+          IRR[2]=0;
+          else if(clearHighest==3)
+          IRR[3]=0;
+          else if(clearHighest==4)
+          IRR[4]=0;
+          else if(clearHighest==5)
+          IRR[5]=0;
+          else if(clearHighest==6)
+          IRR[6]=0;
+          else if(clearHighest==7)
+          IRR[7]=0;
       end
  end
  
@@ -267,9 +269,7 @@ module Priority_Resolver (input [7:0] IRR /*from IRR*/,input clear /*from ISR*/,
 			  chosen_interrupt = 6;
 		  end else if(IRR[7] == 1'b1) begin
 			  chosen_interrupt = 7;
-		  end else begin 
-			  //default no interrupt
-		  end
+		  end 
 	  end
 	  if(clear)begin
 	    chosen_interrupt = 0;
@@ -278,19 +278,21 @@ module Priority_Resolver (input [7:0] IRR /*from IRR*/,input clear /*from ISR*/,
 endmodule
 
 module ISR ( input flag/*from IRR */,input [1:0] intAcounter,input aeoi,input eoi,input [2:0] chosen_interrupt/*from priority resolver*/,
-output [7:0] clearHighest ,output reg [2:0] ISROut,output clear /*to Priority resolver*/);
+output [2:0] clearHighest ,output reg [2:0] ISROut,output clear /*to Priority resolver*/);
+
 reg [2:0] specialDelivery = 7;
-always @* begin
+
+always @(flag or chosen_interrupt or intAcounter or eoi) begin
   if(flag)begin
-    ISROut = specialDelivery;
+    ISROut <= specialDelivery;
   end else if (intAcounter == 2'b01) begin
-  ISROut = chosen_interrupt;
-end
+  ISROut <= chosen_interrupt;
+end else begin
   if(intAcounter == 2'b10 && aeoi) begin
-    ISROut = 0;
+    ISROut <= 0;
   end
   if(eoi && !aeoi)begin
-    ISROut = 0;
+    ISROut <= 0;
     end
 end  
 assign  clearHighest = (flag) ? specialDelivery : chosen_interrupt;
@@ -328,7 +330,7 @@ output [2:0] ISRtocontrol
   
   wire [2:0] Outputchosen_interrupt;
   wire [7:0] OutputIRR;
-  wire [7:0] OutclearHighest;
+  wire [2:0] OutclearHighest;
   
   IRR A (.level_or_edge_flag(level_or_edge_flag),.intAcounter(intAcounter),.mask(mask),.clearHighest(OutclearHighest),
   .i0(i0),.i1(i1),.i2(i2),.i3(i3),.i4(i4),.i5(i5),.i6(i6),.i7(i7),
@@ -343,3 +345,5 @@ output [2:0] ISRtocontrol
   
 
 endmodule
+
+
