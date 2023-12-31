@@ -25,7 +25,7 @@ module Control_Unit_tb;
 
     //INTERNAL SIGNAL
     reg [7:0]DATA_internal_REG;
-    assign DATA_internal = (WR_ENABLE_internal) ? DATA_internal_REG : DATA_internal;
+    assign DATA_internal = (WR_ENABLE_internal) ? DATA_internal_REG : 8'bzzzzzzzz;
     
     
     // Registers for all the wires to use in begin block
@@ -86,9 +86,9 @@ module Control_Unit_tb;
         #0 A0_internal = 1'b1;
         #0 DATA_internal_REG = 8'bzzzzzzzz;
         // Test ICW1 :
-        #0 A0_internal = 1'b0;
-        #0 DATA_internal_REG = 8'b00010001;
-        #5 WR_ENABLE_internal = 1'b1;
+        #5 A0_internal = 1'b0;
+        #0 DATA_internal_REG = 8'b00010011;
+        #0 WR_ENABLE_internal = 1'b1;
         #5 WR_ENABLE_internal = 1'b0;
         // Test ICW2 :
         #0 A0_internal = 1'b1;
@@ -97,15 +97,16 @@ module Control_Unit_tb;
         #5 WR_ENABLE_internal = 1'b0;
         #0 A0_internal = 1'b0;
         // Test ICW3 :
-        #0 A0_internal = 1'b1;
-        #0 DATA_internal_REG = 8'b00111100;
-        #5 WR_ENABLE_internal = 1'b1;
-        #5 WR_ENABLE_internal = 1'b0;
+        //#5 A0_internal = 1'b1;
+        //#0 DATA_internal_REG = 8'b00111100;
+        //#5 WR_ENABLE_internal = 1'b1;
+        //#5 WR_ENABLE_internal = 1'b0;
         // Test ICW4 :
         #0 A0_internal = 1'b1;
         #0 DATA_internal_REG = 8'b00100001;
         #5 WR_ENABLE_internal = 1'b1;
         #5 WR_ENABLE_internal = 1'b0;
+        /*
         // Test OCW1 :
         #0 A0_internal = 1'b1;
         #0 DATA_internal_REG = 8'b01000000;
@@ -121,7 +122,20 @@ module Control_Unit_tb;
         #0 DATA_internal_REG = 8'b00001000;
         #5 WR_ENABLE_internal = 1'b1;
         #5 WR_ENABLE_internal = 1'b0;
+        */
 
+        // Test interrupt :
+        // Step 1-> detect INT:
+        #0 INTERNAL_INT_internal = 1'b1;
+        // Step 2-> 1st INTA:
+        #5 INTA__internal = 1'b0;
+        #5 INTA__internal = 1'b1;
+        // Step 3-> 2nd INTA:
+        #5 INTA__internal = 1'b0;
+        #0 RD_ENABLE_internal = 1'b1;
+        #5 INTA__internal = 1'b1;
+        #0 RD_ENABLE_internal = 1'b0;
+        #0 INTERNAL_INT_internal = 1'b0;
 
     end
 
