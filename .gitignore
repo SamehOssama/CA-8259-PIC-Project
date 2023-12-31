@@ -1,6 +1,8 @@
-*
+*.bak
+*.mti
+*.mpf
+*.vsc
+*.vcd
+*.wlf
 
-!*.v
-!.gitignore
-!README.md
-!screenshots/*
+work/
