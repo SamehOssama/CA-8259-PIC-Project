@@ -126,6 +126,7 @@ module Control_Unit_tb;
 
         // Test interrupt :
         // Step 1-> detect INT:
+        #0 IR_NUM_tb = 3'b010;
         #0 INTERNAL_INT_internal = 1'b1;
         // Step 2-> 1st INTA:
         #5 INTA__internal = 1'b0;
