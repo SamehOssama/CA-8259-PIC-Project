@@ -49,6 +49,14 @@ wire [2:0]  Outputchosen_interrupt;
   #5 OutputIRR = 8'b1111_1111;
   #5 clearFromISR=1;
   #5 clearFromISR=0;
+  
+  
+   
+   
+   
+   
+   
+   
    
  end
 endmodule
