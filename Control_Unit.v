@@ -7,7 +7,7 @@ module Control_Unit (
   input SP_, // 1 >> master , 0 >> slave
   input [2:0] CAS_IN, // for slave 
   input [2:0]IR_NUM,
-  output [2:0] CAS_OUT, //  for master
+  output reg [2:0] CAS_OUT, //  for master
   output reg [7:0] interrupt_mask,
   output reg INT,
   output reg AEOI,  
@@ -37,7 +37,8 @@ module Control_Unit (
   reg [7:0] ICW4_REG = 8'b00000001; 
   reg [7:0] OCW2_REG;
   reg [7:0] OCW3_REG;
-
+  reg [7:0] DATA_REG;
+  
   reg got_ocw2 = 1'b0;
   parameter [1:0] OCW1 = 2'b00;
   parameter [1:0] OCW2 = 2'b01;
@@ -142,13 +143,13 @@ always @(negedge INTA_) begin
     if(state == interrupt_state) begin
         if(INTA_COUNT == 2'b00) begin
             INTA_COUNT <= 2'b01;
-            DATA <= 8'bzzzzzzzz;
+            DATA_REG <= 8'bzzzzzzzz;
         end
         else begin
             if(sngl)
-                DATA <= {upper_address,IR_NUM};
+                DATA_REG <= {upper_address,IR_NUM};
             else if(CAS_IN == ICW3_REG[2:0] && SP_ == 0)
-                DATA <= {upper_address,IR_NUM};
+                DATA_REG <= {upper_address,IR_NUM};
             state <= ready;
             INT <= 0;
             INTA_COUNT <= 2'b10;
@@ -167,7 +168,7 @@ end
 always @(negedge RWL_ENABLE) begin
     if(state == ready) begin
         if(A0 == 1) begin
-            DATA <= interrupt_mask;
+            DATA_REG <= interrupt_mask;
         end
         else begin
             if(RR) begin
@@ -181,7 +182,7 @@ always @(negedge RWL_ENABLE) begin
                 end
             end
             else
-                DATA <= DATA;
+                DATA_REG <= DATA_REG;
         end
     end
     else 
