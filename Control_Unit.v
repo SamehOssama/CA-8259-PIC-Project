@@ -75,7 +75,7 @@ output reg RISR
                     ICW4_REG <= DATA;
                 end else state <= ICW3;
             end
-            default: state <= ICW1;
+            default: t <= t;
         endcase
     end
 
@@ -110,7 +110,7 @@ output reg RISR
                     end
                 end
                 else
-                state <= state;
+                    state <= state;
             end
         end else
             t <= t;
