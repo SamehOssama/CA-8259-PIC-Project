@@ -25,7 +25,6 @@ wire OutspecialDeliveryFlag;
    level_or_edge_flag = 0; 
    #5 intAcounter = 1;
    
-
    i0=0;
    i1=0;
    i2=0;
@@ -59,10 +58,11 @@ wire OutspecialDeliveryFlag;
    #10 i0=0;i1=0; i2=0;i3=0;i4=0;i5=0;i6=0;i7=0;
    #5 intAcounter = 2;
    #5 mask = 8'b0000_0001;
-   #10 i0=1; i1=1; i2=1;i3=1;i4=1;i5=1;i6=1;i7=1;
-   
+   #5 i0=1; i1=1; i2=1;i3=1;i4=1;i5=1;i6=1;i7=1;
+   #10 intAcounter = 1;
    
    //setting all to 1 then clearing them with level sensitive
+   #10 i0=0; i1=0; i2=0;i3=0;i4=0;i5=0;i6=0;i7=0;
    level_or_edge_flag = 1; 
    mask = 8'b0000_0000;
    #10 i0=1;
@@ -85,6 +85,5 @@ wire OutspecialDeliveryFlag;
    #5 intAcounter = 2;
    #5 mask = 8'b0000_0001;
    #10 i0=1; i1=1; i2=1;i3=1;i4=1;i5=1;i6=1;i7=1;
-  
   end
 endmodule
