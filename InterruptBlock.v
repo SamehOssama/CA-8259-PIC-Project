@@ -14,88 +14,89 @@ module IRR (
   input i7,
 
   output specialDeliveryFlag, //to ISR
-  output reg[7:0] IRR, //to priority resolver
+  output [7:0] IRR, //to priority resolver
   output INT //to control
   );
   
-
+  reg[7:0] IRRreg = 8'b0000_0000;
 
   always @(i0 or i1 or i2 or i3 or i4 or i5 or i6 or i7) begin
 	if(level_or_edge_flag) begin
-    IRR[0] <= i0 & ~mask[0];
-    IRR[1] <= i1 & ~mask[1];
-    IRR[2] <= i2 & ~mask[2];
-    IRR[3] <= i3 & ~mask[3];
-    IRR[4] <= i4 & ~mask[4];
-    IRR[5] <= i5 & ~mask[5];
-    IRR[6] <= i6 & ~mask[6];
-    IRR[7] <= i7 & ~mask[7];
+    IRRreg[0] <= i0 & ~mask[0];
+    IRRreg[1] <= i1 & ~mask[1];
+    IRRreg[2] <= i2 & ~mask[2];
+    IRRreg[3] <= i3 & ~mask[3];
+    IRRreg[4] <= i4 & ~mask[4];
+    IRRreg[5] <= i5 & ~mask[5];
+    IRRreg[6] <= i6 & ~mask[6];
+    IRRreg[7] <= i7 & ~mask[7];
  end
  end
+ //edge sensitive
  
  always @(posedge i0) begin
    if(!level_or_edge_flag) begin
-      IRR[0] <= i0 &~mask[0];
+      IRRreg[0] <= i0 &~mask[0];
     end
   end
     always @(posedge i1) begin
       if(!level_or_edge_flag) begin
-      IRR[1] <= i1 &~mask[1];
+      IRRreg[1] <= i1 &~mask[1];
     end
   end
     always @(posedge i2) begin
       if(!level_or_edge_flag) begin
-      IRR[2] <= i2 &~mask[2];
+      IRRreg[2] <= i2 &~mask[2];
     end
   end
     always @(posedge i3) begin
       if(!level_or_edge_flag)begin
-      IRR[3] <= i3 &~mask[3];
+      IRRreg[3] <= i3 &~mask[3];
     end
     end
     always @(posedge i4) begin
       if(!level_or_edge_flag)begin
-      IRR[4] <= i4 &~mask[4];
+      IRRreg[4] <= i4 &~mask[4];
     end
     end
     always @(posedge i5) begin
       if(!level_or_edge_flag)begin
-      IRR[5] <= i5 &~mask[5];
+      IRRreg[5] <= i5 &~mask[5];
     end
     end
     always @(posedge i6) begin
       if(!level_or_edge_flag)begin
-      IRR[6] <= i6 &~mask[6];
+      IRRreg[6] <= i6 &~mask[6];
     end
     end
     always @(posedge i7) begin
       if(!level_or_edge_flag)begin
-      IRR[7] <= i7 &~mask[7];
+      IRRreg[7] <= i7 &~mask[7];
     end
     end
   
      always @(intAcounter) begin
    if((intAcounter == 2'b01) && !(|IRR == 0)) begin
       if(clearHighest==0)
-          IRR[0]=0;
+          IRRreg[0]=0;
           else if(clearHighest==1)
-          IRR[1]=0;
+          IRRreg[1]=0;
           else if(clearHighest==2)
-          IRR[2]=0;
+          IRRreg[2]=0;
           else if(clearHighest==3)
-          IRR[3]=0;
+          IRRreg[3]=0;
           else if(clearHighest==4)
-          IRR[4]=0;
+          IRRreg[4]=0;
           else if(clearHighest==5)
-          IRR[5]=0;
+          IRRreg[5]=0;
           else if(clearHighest==6)
-          IRR[6]=0;
+          IRRreg[6]=0;
           else if(clearHighest==7)
-          IRR[7]=0;
+          IRRreg[7]=0;
       end
  end
  
-
+assign IRR = IRRreg;
  
  assign specialDeliveryFlag = (intAcounter == 2'b01) && (|IRR == 0);
  //sending to control that there is an interrupt
@@ -294,6 +295,7 @@ end else begin
   if(eoi && !aeoi)begin
     ISROut <= 0;
     end
+end
 end  
 assign  clearHighest = (flag) ? specialDelivery : chosen_interrupt;
 assign clear = (ISROut == 0);
@@ -345,5 +347,6 @@ output [2:0] ISRtocontrol
   
 
 endmodule
+
 
 
