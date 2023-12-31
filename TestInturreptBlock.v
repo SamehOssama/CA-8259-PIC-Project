@@ -39,25 +39,46 @@ wire [2:0] ISRtocontrol;
    i6=0;
    i7=0;
    
-   level_or_edge_flag = 0;
+   level_or_edge_flag = 1;
    mask = 8'b0000_0000;
    set=0;
    reset=0;
    aeoi=1;
    eoi=0;
-   //intAcounter = 2b'00;
+   intAcounter = 2'b00;
    
-   //first trying with automatic eoi and edge sensitive
-   
+   //first trying with automatic eoi and level sensitive
+   //it will choose i1
    #10 i1=1;
-   #5  i0=1;
    #5  i7=1;
    #5 intAcounter = 2'b01;
    #5 intAcounter = 2'b10;
    #5 i1=0;
    
+   //case of i0 changed so quickly before the INTA so  ISR will output i7
    
-    
+   #5 i7=0;
+   #5 i0=1;
+   #5 intAcounter = 2'b01;
+   #5 i0=0;
+   #5 intAcounter = 2'b10;
+   
+   //automatic rotation it will choose i1 at the first time then i7 
+  #10 set=1; i1=1; intAcounter=2'b01;
+  #5 intAcounter = 2'b10;
+  #5 i1=0;
+  #10 i1=1; i7=1;
+  #5 intAcounter = 2'b01;
+  #5 intAcounter = 2'b10;
+  #5 i1=0; i7=0;
+  
+
+  
+  
+  
+  
+  
+  
     
     
     
