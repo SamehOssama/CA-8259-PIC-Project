@@ -75,7 +75,7 @@ module IRR (
     end
     end
   
-     always @(intAcounter) begin
+     always @(intAcounter or clearHighest) begin
    if((intAcounter == 2'b01) && !(|IRR == 0)) begin
       if(clearHighest==0)
           IRRreg[0]=0;
@@ -124,7 +124,7 @@ module Priority_Resolver (input [7:0] IRR /*from IRR*/,input clear /*from ISR*/,
 		
   always @* begin
     // Initialize priority status
-    if((prevset == 0 && set == 1) || (prevreset == 1 && reset == 0))begin
+    if(prevset == 0 && set ==1)begin
       
       priority_status[0] = 0;
 	    priority_status[1] = 1;
@@ -139,7 +139,7 @@ module Priority_Resolver (input [7:0] IRR /*from IRR*/,input clear /*from ISR*/,
 	    prevreset = reset;
 	    
     end
-	  if(set || !reset ) begin
+	  if(set) begin
 	    ////////Automatic Rotation mode
 		 //highest priority
 		    iterator0 = (priority_status[0] == 0) ? 0 :
@@ -250,9 +250,10 @@ module Priority_Resolver (input [7:0] IRR /*from IRR*/,input clear /*from ISR*/,
 		priority_status[chosen] = 1;
 		chosen = (chosen) > 0 ? (chosen-1):7;
 		priority_status[chosen] = 0;
-		  
-		
-	  end else begin
+	 end
+	 end
+	 always @*begin
+	   	  if(!set || reset)
 		  //fully nested mode
 		  if(IRR[0] == 1'b1) begin
 			  chosen_interrupt = 0;
@@ -271,11 +272,12 @@ module Priority_Resolver (input [7:0] IRR /*from IRR*/,input clear /*from ISR*/,
 		  end else if(IRR[7] == 1'b1) begin
 			  chosen_interrupt = 7;
 		  end 
-	  end
-	  if(clear)begin
+		  end
+	 always @(clear)begin
+	   if(clear)begin
 	    chosen_interrupt = 0;
 	    end
-	 end
+	   end
 endmodule
 
 module ISR ( input flag/*from IRR */,input [1:0] intAcounter,input aeoi,input eoi,input [2:0] chosen_interrupt/*from priority resolver*/,
