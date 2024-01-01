@@ -138,6 +138,10 @@ module Control_Unit_tb;
         #0 RD_ENABLE_internal = 1'b0;
         #0 INTERNAL_INT_internal = 1'b0;
 
+        // Test read :
+        #5 A0_internal = 1'b1;
+        #0 RD_ENABLE_internal = 1'b1;
+        #5 RD_ENABLE_internal = 1'b0;
     end
 
 
