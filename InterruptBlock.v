@@ -286,10 +286,10 @@ output [2:0] clearHighest ,output reg [2:0] ISROut,output clear /*to Priority re
 reg [2:0] specialDelivery = 7;
 
 always @(flag or chosen_interrupt or intAcounter or eoi) begin
-  if(flag)begin
-    ISROut <= specialDelivery;
-  end else if (intAcounter == 2'b01) begin
-  ISROut <= chosen_interrupt;
+  if(intAcounter == 2'b01)begin
+    ISROut <= chosen_interrupt;
+  end else if (flag) begin
+  ISROut <= specialDelivery;
 end else begin
   if(intAcounter == 2'b10 && aeoi) begin
     ISROut <= 0;
