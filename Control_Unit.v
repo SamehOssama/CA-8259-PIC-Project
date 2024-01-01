@@ -52,6 +52,10 @@ output reg RISR
                 if (!A0 && DATA[4]) begin 
                     state <= ICW2;
                     ICW1_REG <= DATA;
+                    ICW3_REG <= 8'b1000000;
+                    interrupt_mask <= 8'b00000000;
+                    OCW3_REG <= 8'b00001010;
+                    if (!DATA[0]) ICW4_REG <= 8'b00000000;
                 end else state <= ICW1;            
             end
             ICW2: begin
