@@ -154,7 +154,7 @@ output reg RISR
             else begin
                 if(sngl)
                     DATA_REG <= {upper_address,IR_NUM};
-                else if(CAS_IN == ICW3_REG[2:0] && SP_ == 0)
+                else if(CAS_IN == ICW3_REG[2:0] && SP_ == 1'b1)
                     DATA_REG <= {upper_address,IR_NUM};
                 state <= ready;
                 INT <= 0;
@@ -171,7 +171,7 @@ output reg RISR
 
 
     // read block
-    always @(negedge RD_ENABLE) begin
+    always @(posedge RD_ENABLE) begin
         if(state == ready) begin
             if(A0 == 1) begin
                 DATA_REG <= interrupt_mask;
@@ -195,9 +195,11 @@ output reg RISR
         t <= t;
     end
 
-    always @(*) begin
-        if(INTA_COUNT == 2'b10 && SP_ == 1) 
+    always @(posedge INTA_) begin
+        if(INTA_COUNT == 2'b01 && SP_ == 1'b0) 
             CAS_OUT <= IR_NUM;
+        else if(INTA_COUNT == 2'b10 && SP_ == 1'b0) 
+            CAS_OUT <= 0'b000;
         else
             CAS_OUT <= CAS_OUT;
     end
