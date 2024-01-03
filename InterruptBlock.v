@@ -1,3 +1,4 @@
+
 module IRR (
   input level_or_edge_flag ,  //from control
   input [7:0] mask, //from control
@@ -95,6 +96,9 @@ module IRR (
           IRRreg[7]=0;
       end
  end
+
+
+
  
 assign IRR = IRRreg;
  
